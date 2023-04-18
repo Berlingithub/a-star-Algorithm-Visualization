@@ -12,6 +12,7 @@ function distedge(point1,point2)
 }
 function connectedgraph(points,edges,setPoints,setEdges,pointvisitcolor,pointqueuecolor,edgetraversecolor,finalpathcolor,setDisplayText,display=false,startindex=0,endindex=1)
 {
+    // console.log("checking connected");
     let functionlist=[];
     if((points.length==0)||(edges.length==0))
     {
@@ -124,7 +125,7 @@ function connectedgraph(points,edges,setPoints,setEdges,pointvisitcolor,pointque
                         let node1=iter,node2=parent[iter];
                         functionlist.push(()=>setEdges((prevEdges)=>{
                             let newedges=[...prevEdges];
-                            console.log(node1,node2);
+                            // console.log(node1,node2);
                             for(let j=0;j<newedges.length;++j)
                             {
                                 // console.log(newedges[i].start,newedges[i].end,node,neighbours[i]);
@@ -185,6 +186,7 @@ function calculatedgelength(points,edge)
 }
 function calculatedges(numberOfEdges,points,numberOfPoints,setEdges,minedgelength,maxedgelength,strokecolor)
 {
+    // console.log("calculating edges");
     let edgs=[];
     let failedtries=0;
     while(edgs.length<numberOfEdges)
@@ -224,6 +226,7 @@ function calculatedges(numberOfEdges,points,numberOfPoints,setEdges,minedgelengt
 }
 function calculatepoints(numberOfPoints,setPoints,width,height,radius,pointcolor)
 {
+    // console.log("calculating points");
     let pts=[{x:100,y:Math.floor(height/2)},{x:width-100,y:Math.floor(height/2)}];
     while(pts.length<numberOfPoints)
     {
