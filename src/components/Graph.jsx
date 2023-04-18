@@ -10,7 +10,7 @@ export default function()
 
     const [width, setWidth] = useState(null);
     const [height, setHeight] = useState(null);
-    const [displayText,setDisplayText]=useState("");
+    const [displayText,setDisplayText]=useState("Generating a valid graph...");
 
     useEffect(() => {
         if(ref.current)

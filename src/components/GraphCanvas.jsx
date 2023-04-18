@@ -120,7 +120,7 @@ function connectedgraph(points,edges,setPoints,setEdges,pointvisitcolor,pointque
                     let iter=endindex;
                     while(true)
                     {
-                        console.log(iter,parent[iter]);
+                        // console.log(iter,parent[iter]);
                         let node1=iter,node2=parent[iter];
                         functionlist.push(()=>setEdges((prevEdges)=>{
                             let newedges=[...prevEdges];
