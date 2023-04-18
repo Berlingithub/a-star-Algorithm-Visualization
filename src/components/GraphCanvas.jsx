@@ -10,7 +10,7 @@ function distedge(point1,point2)
     
     return Math.sqrt(x_dist*x_dist+y_dist*y_dist);
 }
-function connectedgraph(points,edges,setPoints,setEdges,pointvisitcolor,pointqueuecolor,edgetraversecolor,display=false,startindex=0,endindex=1)
+function connectedgraph(points,edges,setPoints,setEdges,pointvisitcolor,pointqueuecolor,edgetraversecolor,finalpathcolor,setDisplayText,display=false,startindex=0,endindex=1)
 {
     let functionlist=[];
     if((points.length==0)||(edges.length==0))
@@ -18,6 +18,7 @@ function connectedgraph(points,edges,setPoints,setEdges,pointvisitcolor,pointque
         return false;
     }
     let graph=Array(points.length);
+    
     for( let i=0;i<points.length;i+=1)
     {
         graph[i]=[];
@@ -45,18 +46,24 @@ function connectedgraph(points,edges,setPoints,setEdges,pointvisitcolor,pointque
     actualcost[startindex]=0;
     function comparator(a,b)
     {
-        return a[0]<b[0];
+        // console.log(a,b);
+        // console.log("returning:",(a[0]<b[0])?"true":"false");
+        return a[0]-b[0];
     }
     let queue = new PriorityQueue({comparator:comparator});
     
     // console.log(actualcost,estimatedcost);
     queue.queue([actualcost[startindex]+estimatedcost[startindex],startindex]);
+    let parent={};
     while(queue.length>0)
     {
+        // console.log(parent);
         let [cost,node]=queue.dequeue();
+        
         if(display)
         {
             functionlist.push(()=>setPoints((prevPoints)=>{
+                setDisplayText("Minimum Estimated cost:"+(Math.round(cost*100)/100));
                 let newpoints=[...prevPoints];
                 newpoints[node].color=pointvisitcolor;
                 return newpoints;
@@ -74,6 +81,7 @@ function connectedgraph(points,edges,setPoints,setEdges,pointvisitcolor,pointque
             
             if(newcost<actualcost[neighbours[i]])
             {
+                parent[neighbours[i]]=node;
                 actualcost[neighbours[i]]=newcost;
                 if(display)
                 {
@@ -95,7 +103,7 @@ function connectedgraph(points,edges,setPoints,setEdges,pointvisitcolor,pointque
                 {
                     functionlist.push(()=>setPoints((prevPoints)=>{
                         let newpoints=[...prevPoints];
-                        newpoints[node].color=pointqueuecolor;
+                        newpoints[neighbours[i]].color=pointqueuecolor;
                         return newpoints;
                     }))
                 }
@@ -106,6 +114,35 @@ function connectedgraph(points,edges,setPoints,setEdges,pointvisitcolor,pointque
             {
                 if(display)
                 {
+                    functionlist.push(()=>{
+                        setDisplayText("Final minimum cost:"+Math.round(newcost*100)/100);
+                    })
+                    let iter=endindex;
+                    while(true)
+                    {
+                        console.log(iter,parent[iter]);
+                        let node1=iter,node2=parent[iter];
+                        functionlist.push(()=>setEdges((prevEdges)=>{
+                            let newedges=[...prevEdges];
+                            console.log(node1,node2);
+                            for(let j=0;j<newedges.length;++j)
+                            {
+                                // console.log(newedges[i].start,newedges[i].end,node,neighbours[i]);
+                                if(((newedges[j].start===node1)&&(newedges[j].end===node2))||
+                                ((newedges[j].end===node1)&&(newedges[j].start===node2)))
+                                {
+                                    newedges[j].strokecolor=finalpathcolor;
+                                    
+                                }
+                            }
+                            return newedges;
+                        }))
+                        if(parent[iter]===startindex)
+                        {
+                            break;
+                        }
+                        iter=parent[iter];
+                    }
                     return functionlist;
                 }
                 return true;
@@ -214,7 +251,7 @@ function calculatepoints(numberOfPoints,setPoints,width,height,radius,pointcolor
     setPoints(pts);
 }
 
-export default function({width,height})
+export default function({width,height,setDisplayText})
 {
     let radius=12;
     let numberOfPoints=25;
@@ -225,9 +262,10 @@ export default function({width,height})
     let pointcolor="#0B0644";
     let strokecolor="#D60040";
 
-    let pointvisitcolor="#F3DB00";
-    let pointqueuecolor="#2583B8";
+    let pointvisitcolor="#2583B8";
+    let pointqueuecolor="#F3DB00";
     let edgetraversecolor="#0C4A16";
+    let finalpathcolor="#c936c9";
    
     let [points,setPoints]=useState([]);
     let [edges,setEdges]=useState([]);
@@ -263,7 +301,7 @@ export default function({width,height})
         else
         {
             setFinalGraphBuilt(true);
-            let funclist=connectedgraph(points,edges,setPoints,setEdges,pointvisitcolor,pointqueuecolor,edgetraversecolor,true);
+            let funclist=connectedgraph(points,edges,setPoints,setEdges,pointvisitcolor,pointqueuecolor,edgetraversecolor,finalpathcolor,setDisplayText,true);
             // console.log(funclist);
             // console.log(points);
             let funcindex=0;
@@ -276,48 +314,23 @@ export default function({width,height})
                 {
                     funclist[funcindex++]();
                 }
-            }, 500);
+            }, 400);
         }
     },[edges]);
 
-    let circles=points.map(({x,y,color},index)=><Circle key={(x*1000+y)} x={x} y={y} radius={radius} fill={(index>1)?color:
-    ((index==0)?"#3E7C40":"#A31111")}/>)
+    let circles=points.map(({x,y,color},index)=>{
+        return <Circle key={(x*1000+y)} x={x} y={y} radius={radius} fill={(index>1)?color:((index==0)?"#3E7C40":"#A31111")}/>
+    })
 
-    let lines=edges.map((edge)=><Line key={edge.start*numberOfPoints*100+edge.end} points={[points[edge.start].x,points[edge.start].y,points[edge.end].x,points[edge.end].y]} stroke={edge.strokecolor} strokeWidth={7}/>)
+    let lines=edges.map((edge)=><Line key={edge.start*numberOfPoints*100+edge.end} points={[points[edge.start].x,points[edge.start].y,points[edge.end].x,points[edge.end].y]} stroke={edge.strokecolor} strokeWidth={7} />)
     return (
-        <Stage width={width} height={height}>
-                <Layer>
-                    {/* <Text text="Try to drag a star" /> */}
-                    
-                    {/* <Star
-                        // key={star.id}
-                        // id={star.id}
-                        x={100}
-                        y={100}
-                        numPoints={5}
-                        innerRadius={20}
-                        outerRadius={40}
-                        fill="#89b717"
-                        opacity={0.8}
-                        draggable
-                        // rotation={star.rotation}
-                        shadowColor="black"
-                        shadowBlur={10}
-                        shadowOpacity={0.6}
-                        // shadowOffsetX={star.isDragging ? 10 : 5}
-                        // shadowOffsetY={star.isDragging ? 10 : 5}
-                        // scaleX={star.isDragging ? 1.2 : 1}
-                        // scaleY={star.isDragging ? 1.2 : 1}
-                        // onDragStart={handleDragStart}
-                        // onDragEnd={handleDragEnd}
-                    /> */}
-                    {/* <Circle x={300} y={300} radius={radius} fill='#0B0644'/>
-                    <Circle x={200} y={200} radius={radius} fill='#0B0644' shadowColor='rgba(0,0,0,0.5)' shadowBlur={5} shadowOffsetX={7} shadowOffsetY={8} draggable/> */}
-                    {(finalGraphBuilt)?lines:""}
-                    {(finalGraphBuilt)?circles:""}
-                    {/* <Line points={[20,20,50,50]} stroke={"#D60040"} strokeWidth={9}/> */}
-                    
-                </Layer>
-            </Stage>
+        <Stage width={width} height={height} >
+            <Layer>
+                
+                {(finalGraphBuilt)?lines:""}
+                {(finalGraphBuilt)?circles:""}
+                
+            </Layer>
+        </Stage>
     )
 }

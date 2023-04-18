@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "firebase": "^9.19.1",
     "js-priority-queue": "^0.1.5",
     "konva": "^8.4.3",
     "react": "^18.2.0",

@@ -2,3 +2,16 @@
     width: 100%;
     height: 100%;
 }
+.mincost{
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 36px;
+    color: #720b11;
+
+    /* background: linear-gradient(180deg, rgba(255, 255, 255, 0) 87.28%, #0B0644 87.29%); */
+    width: 100%;
+
+    text-align: center;
+    padding: 5px;
+}
